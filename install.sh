@@ -1,9 +1,7 @@
 #!/bin/zsh
 # Builds hdmi-watch and registers it as a login LaunchAgent.
+# Usage: ./install.sh "<display name>" [hook script, default ./hook.sh]
 set -euo pipefail
-
-DISPLAY_NAME="${1:-Odyssey G91SD}"
-SCRIPT="${2:-${0:A:h}/monitor-changed.sh}"
 
 LABEL="com.codeparth.hdmi-watch"
 BIN="$HOME/.local/bin/hdmi-watch"
@@ -12,6 +10,16 @@ LOG="$HOME/Library/Logs/hdmi-watch.log"
 
 mkdir -p "$HOME/.local/bin" "$HOME/Library/LaunchAgents"
 swiftc -O "${0:A:h}/HDMIWatch.swift" -o "$BIN"
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: ./install.sh \"<display name>\" [hook script]" >&2
+  echo "connected displays:" >&2
+  "$BIN" --list | sed 's/^/  /' >&2
+  exit 64
+fi
+DISPLAY_NAME="$1"
+HOOK="${2:-${0:A:h}/hook.sh}"
+[[ -f "$HOOK" ]] || { echo "hook not found: $HOOK" >&2; exit 66; }
 
 cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -23,7 +31,7 @@ cat > "$PLIST" <<EOF
   <array>
     <string>$BIN</string>
     <string>$DISPLAY_NAME</string>
-    <string>${SCRIPT:A}</string>
+    <string>${HOOK:A}</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>

@@ -1,12 +1,13 @@
 #!/bin/zsh
-# Run by hdmi-watch with "connected" or "disconnected".
-# Menu bar auto-hide: Always with the external monitor, Never on the built-in screen alone.
+# Menu bar auto-hide: Always while an OLED monitor is attached (avoids burn-in from a static
+# menu bar), Never on the built-in screen alone.
+# Install with: ./install.sh "<display name>" examples/oled-menu-bar.sh
 set -eu
 
 case "${1:-}" in
   connected)    fullscreen=false autohide=true ;;
   disconnected) fullscreen=true  autohide=false ;;
-  *) echo "usage: monitor-changed.sh connected|disconnected" >&2; exit 64 ;;
+  *) echo "usage: oled-menu-bar.sh connected|disconnected" >&2; exit 64 ;;
 esac
 
 # System Events only controls _HIHideMenuBar, so write the full-screen key first;
